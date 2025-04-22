@@ -33,25 +33,25 @@ from plugantic import PluginAnnotation, BasePlugin, BasePluginConfig
 
 
 class BaseApplicationPluginConfig(BasePluginConfig):
-  x: int = 0
+    x: int = 0
 
 
 class BaseApplicationPlugin(BasePlugin, ABC):
-  _config: BaseApplicationPluginConfig
+    _config: BaseApplicationPluginConfig
 
-  def application_specific_method(self):
-    ...
+    def application_specific_method(self):
+        ...
 
 
 class ApplicationConfig(BaseModel):
-  plugins: list[Annotated[BaseApplicationPlugin, PluginAnnotation("myapp.plugin")]]
+    plugins: list[Annotated[BaseApplicationPlugin, PluginAnnotation("myapp.plugin")]]
 
 
 def main():
-  with open("config.yaml") as config_file:
-    config = ApplicationConfig.model_validate(safe_load(config_file))
+    with open("config.yaml") as config_file:
+        config = ApplicationConfig.model_validate(safe_load(config_file))
 
-  print(config.plugins)
+    print(config.plugins)
 ```
 
 An example configuration file for the above code could look like this:
