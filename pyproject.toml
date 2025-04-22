@@ -1,0 +1,18 @@
+[project]
+name = "plugantic"
+version = "0.1.0"
+description = "A pydantic based plugin loading and configuration."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENCE"]
+authors = [
+    { name = "Marcin Jaworski", email = "marcin@jaworski.me" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic~=2.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
