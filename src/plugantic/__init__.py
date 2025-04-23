@@ -5,6 +5,7 @@ from importlib.metadata import entry_points
 
 from pydantic import BaseModel, ConfigDict, GetCoreSchemaHandler
 from pydantic_core import core_schema
+from pydantic_core.core_schema import ValidationInfo
 
 __all__ = [
     "BasePlugin", "PluginLoader",
@@ -30,13 +31,18 @@ class BasePlugin(ABC):
     are then inherited by plugin implementations.
     """
 
-    _config: BasePluginConfig
+    _context: Any | None
+    """
+    An optional validation context.
+    """
+
     _config: BaseModel
     """
     A type annotation for configuration model's class for the plugin.
     """
 
-    def __init__(self, config: BasePluginConfig):
+    def __init__(self, config: BaseModel, context: Any):
+        self._context = context
         self._config = config
 
 
@@ -77,9 +83,7 @@ class PluginLoader:
 
         base_config_class = get_type_hints(source_type)["_config"]
 
-        def validate_from_config(value: str | BasePluginConfig) -> BasePlugin:
-            if not isinstance(value, BasePluginConfig):
-                value = BasePluginConfig.model_validate({"name": value})
+        def validate_from_config(value: str | _PluginConfig, info: ValidationInfo) -> BasePlugin:
             if not isinstance(value, _PluginConfig):
                 value = _PluginConfig.model_validate({"name": value})
 
@@ -109,7 +113,7 @@ class PluginLoader:
 
             config = plugin_config_class.model_validate(value.model_extra)
 
-            p = source_type(config)
+            p = source_type(config, info.context)
             return p
 
         from_plugin_config_schema = core_schema.chain_schema(
@@ -120,7 +124,7 @@ class PluginLoader:
                         base_config_class.__pydantic_core_schema__,
                     ]
                 ),
-                core_schema.no_info_plain_validator_function(validate_from_config),
+                core_schema.with_info_plain_validator_function(validate_from_config),
             ]
         )
 
