@@ -29,10 +29,10 @@ from typing import Annotated
 
 from yaml import safe_load
 from pydantic import BaseModel
-from plugantic import PluginAnnotation, BasePlugin, BasePluginConfig
+from plugantic import PluginAnnotation, BasePlugin
 
 
-class BaseApplicationPluginConfig(BasePluginConfig):
+class BaseApplicationPluginConfig(BaseModel):
     x: int = 0
 
 

@@ -7,10 +7,10 @@ from pydantic import BaseModel, ConfigDict, GetCoreSchemaHandler
 from pydantic_core import core_schema
 
 
-class BasePluginConfig(BaseModel):
+
+class _PluginConfig(BaseModel):
     """
-    A base class for plugin configuration. If a plugin needs specific configuration parameters, a new class should
-    be created, which inherits from this one, and it should include fields for the parameters.
+    An internal class for raw plugin configuration. It is used only to load and instantiate the plugin.
     """
 
     model_config = ConfigDict(extra="allow")
@@ -28,6 +28,7 @@ class BasePlugin(ABC):
     """
 
     _config: BasePluginConfig
+    _config: BaseModel
     """
     A type annotation for configuration model's class for the plugin.
     """
@@ -76,6 +77,8 @@ class PluginAnnotation:
         def validate_from_config(value: str | BasePluginConfig) -> BasePlugin:
             if not isinstance(value, BasePluginConfig):
                 value = BasePluginConfig.model_validate({"name": value})
+            if not isinstance(value, _PluginConfig):
+                value = _PluginConfig.model_validate({"name": value})
 
             eps = entry_points(name=value.name, group=self.plugin_group)
             try:
@@ -96,12 +99,12 @@ class PluginAnnotation:
                 raise ValueError(f"{plugin_class} is not a subclass of {source_type}")
 
             plugin_config_class = get_type_hints(plugin_class)["_config"]
-            if not issubclass(plugin_config_class, BasePluginConfig):
+            if not issubclass(plugin_config_class, BaseModel):
                 raise ValueError(
-                    f"{plugin_config_class} is not a subclass of {base_config_class}"
+                    f"{plugin_config_class} is not a subclass of {BaseModel}"
                 )
 
-            config = plugin_config_class.model_validate(value.model_dump())
+            config = plugin_config_class.model_validate(value.model_extra)
 
             p = source_type(config)
             return p
