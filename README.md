@@ -29,7 +29,7 @@ from typing import Annotated
 
 from yaml import safe_load
 from pydantic import BaseModel
-from plugantic import PluginAnnotation, BasePlugin
+from plugantic import PluginLoader, BasePlugin
 
 
 class BaseApplicationPluginConfig(BaseModel):
@@ -44,7 +44,7 @@ class BaseApplicationPlugin(BasePlugin, ABC):
 
 
 class ApplicationConfig(BaseModel):
-    plugins: list[Annotated[BaseApplicationPlugin, PluginAnnotation("myapp.plugin")]]
+    plugins: list[Annotated[BaseApplicationPlugin, PluginLoader("myapp.plugin")]]
 
 
 def main():
@@ -90,5 +90,5 @@ cool_plugin = "myapp_plugins.cool_pluging:CoolPlugin"
 other_plugin = "myapp_plugins.other_plugin:OtherPlugin"
 ```
 
-The entry point needs to point to a class which inherits from the `PluginAnnotation` annotated class in the config
+The entry point needs to point to a class which inherits from the `PluginLoader` annotated class in the config
 model.

@@ -6,6 +6,9 @@ from importlib.metadata import entry_points
 from pydantic import BaseModel, ConfigDict, GetCoreSchemaHandler
 from pydantic_core import core_schema
 
+__all__ = [
+    "BasePlugin", "PluginLoader",
+]
 
 
 class _PluginConfig(BaseModel):
@@ -38,7 +41,7 @@ class BasePlugin(ABC):
 
 
 @dataclasses.dataclass(frozen=True)
-class PluginAnnotation:
+class PluginLoader:
     """
     A metadata class to annotate a model field as a plugin instance. It takes a `group_name` argument, which is
     a name of the entry points group for plugin lookup.
@@ -47,10 +50,10 @@ class PluginAnnotation:
 
         from typing import Annotated
         from pydantic import BaseModel
-        from plugantic import BasePlugin, PluginAnnotation
+        from plugantic import BasePlugin, PluginLoader
 
         class Config(BaseModel):
-            plugin: Annotated[BasePlugin, PluginAnnotation("app.plugin")]
+            plugin: Annotated[BasePlugin, PluginLoader("app.plugin")]
 
         c = Config.model_validate({"plugin": {"name": "myplugin"}})
 
