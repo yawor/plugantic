@@ -106,9 +106,9 @@ class PluginLoader:
                 raise ValueError(f"{plugin_class} is not a subclass of {source_type}")
 
             plugin_config_class = get_type_hints(plugin_class)["_config"]
-            if not issubclass(plugin_config_class, BaseModel):
+            if not issubclass(plugin_config_class, base_config_class):
                 raise ValueError(
-                    f"{plugin_config_class} is not a subclass of {BaseModel}"
+                    f"{plugin_config_class} is not a subclass of {base_config_class}"
                 )
 
             config = plugin_config_class.model_validate(value.model_extra)
@@ -121,7 +121,7 @@ class PluginLoader:
                 core_schema.union_schema(
                     [
                         core_schema.str_schema(min_length=1),
-                        base_config_class.__pydantic_core_schema__,
+                        _PluginConfig.__pydantic_core_schema__,
                     ]
                 ),
                 core_schema.with_info_plain_validator_function(validate_from_config),
